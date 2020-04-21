@@ -1,0 +1,95 @@
+mutation persistNodes {
+  persistNodes(
+    nodes: [
+      { id: "a", payload: "{ \"id\": \"a\" }", label: "A", graph: "graph-01" }
+      { id: "b", payload: "{ \"id\": \"b\" }", label: "B", graph: "graph-01" }
+      { id: "c", payload: "{ \"id\": \"c\" }", label: "C", graph: "graph-01" }
+      { id: "d", payload: "{ \"id\": \"d\" }", label: "D", graph: "graph-01" }
+    ]
+  )
+}
+
+mutation persistEdges {
+  persistEdges(
+    edges: [
+      {
+        id: "a->b"
+        from: "a"
+        to: "b"
+        payload: "{ \"id\": \"a->b\" }"
+        relation: "connected"
+        graph: "graph-01"
+      }
+      {
+        id: "a->c"
+        from: "a"
+        to: "c"
+        payload: "{ \"id\": \"a->c\" }"
+        relation: "connected"
+        graph: "graph-01"
+      }
+      {
+        id: "b->c"
+        from: "b"
+        to: "c"
+        payload: "{ \"id\": \"a->b\" }"
+        relation: "connected"
+        graph: "graph-01"
+      }
+      {
+        id: "c->a"
+        from: "c"
+        to: "a"
+        payload: "{ \"id\": \"c->a\" }"
+        relation: "connected"
+        graph: "graph-01"
+      }
+      {
+        id: "d->a"
+        from: "d"
+        to: "a"
+        payload: "{ \"id\": \"d->a\" }"
+        relation: "connected"
+        graph: "graph-01"
+      }
+    ]
+  )
+}
+
+query node {
+  node(id: "a") {
+    id
+    payload
+    graph
+  }
+}
+
+query nodes {
+  nodes(ids: ["a", "b", "c"]) {
+    id
+    payload
+    graph
+  }
+}
+
+query edges {
+  edges(ids: ["a->b", "b->c"]) {
+    id
+    from
+    to
+    payload
+    graph
+  }
+}
+
+query graph {
+  graph {
+    id
+    nodes {
+      id
+    }
+    edges {
+      id
+    }
+  }
+}

@@ -1,0 +1,72 @@
+# Scalars
+scalar JSON
+
+# Boilerplate
+type Info {
+  id: ID!
+  name: String!
+  description: String
+}
+
+type Node {
+  id: ID!
+  label: String!
+  payload: JSON
+  graph: ID!
+}
+
+input NodeInput {
+  id: ID!
+  label: String!
+  payload: JSON
+  graph: ID!
+}
+
+type Edge {
+  id: ID!
+  from: ID!
+  to: ID!
+  payload: JSON
+  relation: ID!
+  graph: ID!
+}
+
+input EdgeInput {
+  id: ID!
+  from: ID!
+  to: ID!
+  payload: JSON
+  relation: ID!
+  graph: ID!
+}
+
+type Graph {
+  id: ID!
+  nodes: [Node!]!
+  edges: [Edge!]!
+}
+
+# Query Root
+type Query {
+  # Boilerplate
+  info: Info
+  graph: Graph
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node!]!
+  edge(id: ID!): Edge
+  edges(ids: [ID!]!): [Edge!]!
+}
+
+type Mutation {
+  persistNode(id: ID!, label: String!, payload: JSON, graph: ID!): ID!
+  persistNodes(nodes: [NodeInput!]!): [ID!]!
+  persistEdge(
+    id: ID!
+    from: ID!
+    to: ID!
+    relation: ID!
+    payload: JSON
+    graph: ID!
+  ): ID!
+  persistEdges(edges: [EdgeInput!]!): [ID!]!
+}

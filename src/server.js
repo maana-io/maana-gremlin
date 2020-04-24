@@ -24,7 +24,7 @@ import { makeExecutableSchema } from 'graphql-tools'
 import path from 'path'
 import querystring from 'querystring'
 import request from 'request-promise-native'
-
+import bodyParser from 'body-parser'
 // load .env into process.env.*
 require('dotenv').config()
 
@@ -93,6 +93,8 @@ const corsOptions = {
   credentials: true // <-- REQUIRED backend setting
 }
 
+app.use(bodyParser.json({ limit: '50mb' }))
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 app.use(cors(corsOptions)) // enable all CORS requests
 app.options('*', cors()) // enable pre-flight for all routes
 

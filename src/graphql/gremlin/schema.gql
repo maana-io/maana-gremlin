@@ -40,6 +40,12 @@ input EdgeInput {
   graph: ID!
 }
 
+input GraphInput {
+  id: ID!
+  nodes: [NodeInput!]!
+  edges: [EdgeInput!]!
+}
+
 type Graph {
   id: ID!
   nodes: [Node!]!
@@ -55,18 +61,15 @@ type Query {
   nodes(ids: [ID!]!): [Node!]!
   edge(id: ID!): Edge
   edges(ids: [ID!]!): [Edge!]!
+  nodeOutgoingConnections(node: ID!, relation: ID): Graph!
+  nodeIncomingConnections(node: ID!, relation: ID): Graph!
+  shortestPath(startNode: ID!, endNode: ID!): String
 }
 
 type Mutation {
-  persistNode(id: ID!, label: String!, payload: JSON, graph: ID!): ID!
+  persistNode(node: [NodeInput!]): ID!
   persistNodes(nodes: [NodeInput!]!): [ID!]!
-  persistEdge(
-    id: ID!
-    from: ID!
-    to: ID!
-    relation: ID!
-    payload: JSON
-    graph: ID!
-  ): ID!
+  persistEdge(edge: EdgeInput): ID!
   persistEdges(edges: [EdgeInput!]!): [ID!]!
+  persistGraph(graph: GraphInput!): ID!
 }

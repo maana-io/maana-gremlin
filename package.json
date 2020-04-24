@@ -2,7 +2,7 @@
   "name": "maana-gremlin",
   "author": "Maana, Inc.",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Maana Q Wrapper for Gremlin",
   "main": "src/start.js",
   "repository": "git@github.com:maana-io/q-svc-templates.git",

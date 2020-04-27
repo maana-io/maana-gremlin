@@ -10,14 +10,14 @@ type Info {
 
 type Node {
   id: ID!
-  label: String!
+  label: ID!
   payload: JSON
   graph: ID!
 }
 
 input NodeInput {
   id: ID!
-  label: String!
+  label: ID!
   payload: JSON
   graph: ID!
 }
@@ -67,9 +67,9 @@ type Query {
 }
 
 type Mutation {
-  persistNode(node: [NodeInput!]): ID!
+  persistNode(node: NodeInput!): ID!
   persistNodes(nodes: [NodeInput!]!): [ID!]!
-  persistEdge(edge: EdgeInput): ID!
+  persistEdge(edge: EdgeInput): ID
   persistEdges(edges: [EdgeInput!]!): [ID!]!
   persistGraph(graph: GraphInput!): ID!
 }

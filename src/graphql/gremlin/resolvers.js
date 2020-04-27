@@ -31,65 +31,82 @@ const SELF = SERVICE_ID || 'io.maana.template'
 // dummy in-memory store
 
 const persistNode = async ({ id, label, payload, graph }) => {  
-  const nodev = {
-    id,
-    label,
-    payload,
-    graph
+  try {
+    const nodev = {
+      id,
+      label,
+      payload,
+      graph
+    }
+  
+    const result = await client.submit(
+      "g.V().has('id' ,id).fold().coalesce(unfold(),addV(label).property('id', id).property('payload', payload).property('graph', graph).property('partitionKey', 'partitionKey'))",
+      nodev
+    )
+  
+    const node = _.first(result._items)
+    return node?.id
+  } catch(e) {
+    throw new Error(e)
   }
 
-  const result = await client.submit(
-    "g.V().has('id' ,id).fold().coalesce(unfold(),addV(label).property('id', id).property('payload', payload).property('graph', graph).property('partitionKey', 'partitionKey'))",
-    nodev
-  )
-
-  const node = _.first(result._items)
-  return node?.id
 }
 
 const persistEdge = async ({ id, from, to, payload, relation, graph }) => {
-  const edgeV = {
-    id,
-    from,
-    to,
-    relation,
-    payload,
-    graph
+  try {
+    const edgeV = {
+      id,
+      from,
+      to,
+      relation,
+      payload,
+      graph
+    }
+    const result = await client.submit(
+      "g.E().has('id', id).fold().coalesce(unfold(),g.V(from).addE(relation).property('id', id).property('payload', payload).property('graph', graph).to(g.V(to)))",
+      edgeV
+    )
+  
+    const edge = _.first(result._items)
+    return edge?.id
+  } catch (e){
+    throw new Error(e)
   }
-  const result = await client.submit(
-    "g.E().has('id', id).fold().coalesce(unfold(),g.V(from).addE(relation).property('id', id).property('payload', payload).property('graph', graph).to(g.V(to)))",
-    edgeV
-  )
 
-  const edge = _.first(result._items)
-  return edge?.id
 }
 
 const getNode = async ({ id }) => {
-  const result = await client.submit('g.V(id)', { id })
-  const rawNode = result._items[0]
-
-  console.log(result)
-  return {
-    id: rawNode.id,
-    label: rawNode.label,
-    payload: rawNode.properties.payload[0].value,
-    graph: rawNode.properties.graph[0].value
+  try {
+    const result = await client.submit('g.V(id)', { id })
+    const rawNode = result._items[0]
+    return {
+      id: rawNode.id,
+      label: rawNode.label,
+      payload: rawNode.properties.payload[0].value,
+      graph: rawNode.properties.graph[0].value
+    }
+  } catch (e) {
+    throw new Error(e)
   }
 }
 
 const getEdge = async ({ id }) => {
-  const result = await client.submit('g.E(id)', { id })
-  const rawEdge = result._items[0]
+  try {
+    const result = await client.submit('g.E(id)', { id })
+    const rawEdge = result._items[0]
 
-  return {
-    id: rawEdge.id,
-    label: rawEdge.label,
-    from: rawEdge.outV,
-    to: rawEdge.inV,
-    payload: rawEdge.properties.payload[0].value,
-    graph: rawEdge.properties.graph[0].value
+    return {
+      id: rawEdge.id,
+      label: rawEdge.label,
+      from: rawEdge.outV,
+      to: rawEdge.inV,
+      payload: rawEdge.properties.payload[0].value,
+      graph: rawEdge.properties.graph[0].value
+    }
+  } catch (e) {
+    throw new Error(e)
   }
+
 }
 
 export const resolver = {
@@ -134,8 +151,8 @@ export const resolver = {
         return {
           id: rawNode.id,
           label: rawNode.label,
-          payload: rawNode.properties.payload[0].value,
-          graph: rawNode.properties.graph[0].value
+          payload: rawNode.properties ? rawNode.properties.payload[0].value : null,
+          graph: rawNode.properties ? rawNode.properties.graph[0].value : null
         }
       })      
       const edges = rawEdges._items.map(rawEdge => {
@@ -144,8 +161,8 @@ export const resolver = {
           relation: rawEdge.label,
           from: rawEdge.outV,
           to: rawEdge.inV,
-          payload: rawEdge.properties.payload[0].value,
-          graph: rawEdge.properties.graph[0].value
+          payload: rawEdge.properties ? rawEdge.properties.payload[0].value : null,
+          graph: rawEdge.properties ? rawEdge.properties.graph[0].value : null
         }
       })
 

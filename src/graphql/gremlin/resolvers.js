@@ -22,6 +22,8 @@ const client = new Gremlin.driver.Client(config.endpoint, {
   authenticator,
   traversalsource: 'g',
   rejectUnauthorized: true,
+  idleConnectionTimeout: 5000,
+  evaluationTimeout: 20000,
   mimeType: 'application/vnd.gremlin-v2.0+json'
 })
 
@@ -50,8 +52,8 @@ const persistNode = async ({ id, label, payload, graph }) => {
     }
   
     const result = await client.submit(
-      "g.V().has('id' ,id).fold().coalesce(unfold(),addV(label).property('id', id).property('payload', payload).property('graph', graph).property('partitionKey', 'partitionKey'))",
-      nodev
+      "g.V(id).fold().coalesce(unfold(),addV(label).property('id', id).property('payload', payload).property('graph', graph).property('partitionKey', 'partitionKey'))",
+       nodev
     )
   
     const node = _.first(result._items)

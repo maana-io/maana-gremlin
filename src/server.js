@@ -25,6 +25,8 @@ import path from 'path'
 import querystring from 'querystring'
 import request from 'request-promise-native'
 import bodyParser from 'body-parser'
+import timeout from 'connect-timeout'
+
 // load .env into process.env.*
 require('dotenv').config()
 
@@ -96,6 +98,7 @@ const corsOptions = {
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 app.use(cors(corsOptions)) // enable all CORS requests
+app.use(timeout('30s'))
 app.options('*', cors()) // enable pre-flight for all routes
 
 app.get('/', (req, res) => {

@@ -55,7 +55,7 @@ const persistNode = async ({ id, label, payload, graph }) => {
     }
   
     const result = await client.submit(
-      "g.V(id).fold().coalesce(unfold(),addV(label).property('id', id).property('payload', payload).property('graph', graph).property('partitionKey', 'partitionKey'))",
+      "g.addV(label).property('id', id).property('payload', payload).property('graph', graph).property('partitionKey', 'partitionKey'))",
        nodev
     )
 
@@ -83,7 +83,8 @@ const persistEdge = async ({ id, from, to, payload, relation, graph }) => {
     }   
 
     const result = await client.submit(
-      "g.E(id).fold().coalesce(unfold(),g.V(from).addE(relation).property('id', id).property('payload', payload).property('graph', graph).to(g.V(to)))",
+      // "g.E(id).fold().coalesce(unfold(),g.V(from).addE(relation).property('id', id).property('payload', payload).property('graph', graph).to(g.V(to)))",
+      "g.addE(relation).property('id', id).property('payload', payload).property('graph', graph).from(from).to(to)",
       edgeV
     )
     

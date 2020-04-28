@@ -30,6 +30,9 @@ const client = new Gremlin.driver.Client(config.endpoint, {
 const SERVICE_ID = process.env.SERVICE_ID
 const SELF = SERVICE_ID || 'io.maana.template'
 
+let persistNodesCounter = 0
+let persistEdgesCounter = 0
+
 // dummy in-memory store
 const executeSerial = async (tasks, onComplete) => {
   return tasks.reduce((promiseChain, currentTask) => {
@@ -55,6 +58,9 @@ const persistNode = async ({ id, label, payload, graph }) => {
       "g.V(id).fold().coalesce(unfold(),addV(label).property('id', id).property('payload', payload).property('graph', graph).property('partitionKey', 'partitionKey'))",
        nodev
     )
+
+    persistNodesCounter++
+    console.log(`persisted nodes: ${persistNodesCounter}`)
   
     const node = _.first(result._items)
     return node?.id
@@ -65,6 +71,7 @@ const persistNode = async ({ id, label, payload, graph }) => {
 }
 
 const persistEdge = async ({ id, from, to, payload, relation, graph }) => {
+ 
   try {
     const edgeV = {
       id,
@@ -79,13 +86,16 @@ const persistEdge = async ({ id, from, to, payload, relation, graph }) => {
       "g.E(id).fold().coalesce(unfold(),g.V(from).addE(relation).property('id', id).property('payload', payload).property('graph', graph).to(g.V(to)))",
       edgeV
     )
+    
+    persistEdgesCounter++
+    console.log(`persisted edges: ${persistEdgesCounter}\n`)
   
     const edge = _.first(result._items)
     return edge?.id
   } catch (e){
     throw new Error(e)
   }
-
+  
 }
 
 const getNode = async ({ id }) => {

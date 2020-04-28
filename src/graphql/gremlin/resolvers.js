@@ -29,7 +29,7 @@ const SERVICE_ID = process.env.SERVICE_ID
 const SELF = SERVICE_ID || 'io.maana.template'
 
 // dummy in-memory store
-const allSerial = async (tasks, onComplete) => {
+const executeSerial = async (tasks, onComplete) => {
   return tasks.reduce((promiseChain, currentTask) => {
       return promiseChain.then(chainResults =>
           currentTask.then(currentResult =>
@@ -239,20 +239,20 @@ export const resolver = {
     persistNode: async (_, { node }) => persistNode({ ...node }),
     persistNodes: async (_, { nodes }) => {
       const tasks = nodes.map(node => persistNode({ ...node }))
-      return await allSerial(tasks, (res) => res.filter(x => x))            
+      return await executeSerial(tasks, (res) => res.filter(x => x))            
     },
     persistEdge: async (_, { edge }) => persistEdge({ ...edge }),
     persistEdges: async (_, { edges }) => {
       const tasks = edges.map(edge => persistEdge({ ...edge }))
-      return await allSerial(tasks, (res) => res.filter(x => x))      
+      return await executeSerial(tasks, (res) => res.filter(x => x))      
     },
     persistGraph: async (_, { graph }) => {
       let tasks = graph.nodes.map(node => persistNode({ ...node }))
-      await allSerial(tasks, (res) => res.filter(x => x))  
+      await executeSerial(tasks, (res) => res.filter(x => x))  
       
       setTimeout(async () => {
         tasks = graph.edges.map(edge => persistEdge({ ...edge }))
-        await allSerial(tasks, (res) => res.filter(x => x))  
+        await executeSerial(tasks, (res) => res.filter(x => x))  
       }, 1000)
 
       return graph.id

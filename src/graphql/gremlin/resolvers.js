@@ -29,7 +29,17 @@ const SERVICE_ID = process.env.SERVICE_ID
 const SELF = SERVICE_ID || 'io.maana.template'
 
 // dummy in-memory store
-
+const allSerial = async (tasks, onComplete) => {
+  return tasks.reduce((promiseChain, currentTask) => {
+      return promiseChain.then(chainResults =>
+          currentTask.then(currentResult =>
+              [ ...chainResults, currentResult ]
+          )
+      );
+  }, Promise.resolve([])).then(results => {
+      return onComplete(results)
+  });
+}
 const persistNode = async ({ id, label, payload, graph }) => {  
   try {
     const nodev = {
@@ -61,9 +71,10 @@ const persistEdge = async ({ id, from, to, payload, relation, graph }) => {
       relation,
       payload,
       graph
-    }
+    }   
+
     const result = await client.submit(
-      "g.E().has('id', id).fold().coalesce(unfold(),g.V(from).addE(relation).property('id', id).property('payload', payload).property('graph', graph).to(g.V(to)))",
+      "g.E(id).fold().coalesce(unfold(),g.V(from).addE(relation).property('id', id).property('payload', payload).property('graph', graph).to(g.V(to)))",
       edgeV
     )
   
@@ -227,22 +238,21 @@ export const resolver = {
   Mutation: {
     persistNode: async (_, { node }) => persistNode({ ...node }),
     persistNodes: async (_, { nodes }) => {
-      const result = await Promise.all(
-        nodes.map(node => persistNode({ ...node }))
-      )
-      return result.filter(x => x)
+      const tasks = nodes.map(node => persistNode({ ...node }))
+      return await allSerial(tasks, (res) => res.filter(x => x))            
     },
     persistEdge: async (_, { edge }) => persistEdge({ ...edge }),
     persistEdges: async (_, { edges }) => {
-      const result = await Promise.all(
-        edges.map(edge => persistEdge({ ...edge }))
-      )      
-      return result.filter(x => x)
+      const tasks = edges.map(edge => persistEdge({ ...edge }))
+      return await allSerial(tasks, (res) => res.filter(x => x))      
     },
     persistGraph: async (_, { graph }) => {
-      await Promise.all(graph.nodes.map(node => persistNode({ ...node })))
+      let tasks = graph.nodes.map(node => persistNode({ ...node }))
+      await allSerial(tasks, (res) => res.filter(x => x))  
+      
       setTimeout(async () => {
-        await Promise.all(graph.edges.map(edge => persistEdge({ ...edge })))
+        tasks = graph.edges.map(edge => persistEdge({ ...edge }))
+        await allSerial(tasks, (res) => res.filter(x => x))  
       }, 1000)
 
       return graph.id
